@@ -37,6 +37,7 @@ def start_mqtt_client(frame_store: LatestFrameStore) -> mqtt.Client:
         client.subscribe(topic)
 
     def on_message(client, userdata, msg):
+        print(f"[mqtt] frame received ({len(msg.payload)} bytes)")
         frame_store.set(msg.payload)
 
     def on_disconnect(client, userdata, flags, reason_code, properties):

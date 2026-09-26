@@ -19,7 +19,7 @@ class GuidanceClient:
 
     def describe_frame(self, jpeg_bytes: bytes) -> str:
         response = self._client.models.generate_content(
-            model="gemini-2.5-flash",
+            model="gemini-3.8-flash",
             contents=[
                 _SYSTEM_PROMPT,
                 types.Part.from_bytes(data=jpeg_bytes, mime_type="image/jpeg"),
