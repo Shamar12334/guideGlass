@@ -2,70 +2,374 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>guideGlass</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <style>
+    :root {
+      --bg: #05070d;
+      --panel: rgba(16, 22, 38, 0.65);
+      --panel-border: rgba(56, 229, 255, 0.25);
+      --cyan: #2ee6ff;
+      --violet: #8a5cff;
+      --text: #e8f6ff;
+      --text-dim: #7c8aa5;
+      --danger: #ff3d5a;
+      --ok: #2ee68a;
+      color-scheme: dark;
+    }
+
+    * { box-sizing: border-box; }
+
     body {
-      font-family: system-ui, sans-serif;
-      background: #111;
-      color: #eee;
+      margin: 0;
+      min-height: 100vh;
+      padding: max(2rem, env(safe-area-inset-top, 0px)) 1.25rem max(2rem, env(safe-area-inset-bottom, 0px));
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Rajdhani', system-ui, sans-serif;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      height: 100vh;
-      margin: 0;
-      gap: 1.5rem;
+      gap: 1.75rem;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* animated grid + glow backdrop */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      z-index: -2;
+      background-image:
+        linear-gradient(rgba(46, 230, 255, 0.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(46, 230, 255, 0.06) 1px, transparent 1px);
+      background-size: 42px 42px;
+      mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 40%, transparent 90%);
+    }
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      z-index: -3;
+      background:
+        radial-gradient(ellipse 60% 40% at 20% 10%, rgba(138, 92, 255, 0.20), transparent 60%),
+        radial-gradient(ellipse 60% 40% at 85% 15%, rgba(46, 230, 255, 0.16), transparent 60%);
+    }
+
+    header {
       text-align: center;
-      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.35rem;
     }
-    h1 { margin-bottom: 0; }
-    #status { color: #999; }
-    #wsUrl {
-      width: 20rem;
-      padding: 0.5rem;
-      font-size: 1rem;
-      border-radius: 0.5rem;
-      border: 1px solid #444;
-      background: #222;
-      color: #eee;
+
+    .logo-mark {
+      width: 3.25rem;
+      height: 3.25rem;
+      filter: drop-shadow(0 0 10px var(--cyan));
     }
-    button {
-      font-size: 1.5rem;
-      padding: 1rem 3rem;
+
+    h1 {
+      margin: 0;
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 900;
+      font-size: clamp(1.9rem, 6vw, 2.75rem);
+      letter-spacing: 0.12em;
+      background: linear-gradient(90deg, var(--cyan), var(--violet));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      text-shadow: 0 0 30px rgba(46, 230, 255, 0.25);
+    }
+
+    .tagline {
+      margin: 0;
+      color: var(--text-dim);
+      font-size: 0.95rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+
+    main {
+      width: 100%;
+      max-width: 30rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--panel-border);
       border-radius: 1rem;
+      padding: 1.25rem;
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      box-shadow: 0 0 0 1px rgba(255,255,255,0.02), 0 20px 40px -20px rgba(0,0,0,0.6);
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .panel-title {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.8rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--cyan);
+    }
+    .panel-title .dot {
+      width: 0.5rem;
+      height: 0.5rem;
+      border-radius: 50%;
+      background: var(--cyan);
+      box-shadow: 0 0 8px var(--cyan);
+    }
+
+    input {
+      width: 100%;
+      padding: 0.7rem 0.9rem;
+      font-size: 1rem;
+      font-family: 'Rajdhani', sans-serif;
+      border-radius: 0.6rem;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(5, 8, 16, 0.6);
+      color: var(--text);
+    }
+    input::placeholder { color: var(--text-dim); }
+    input:focus {
+      outline: none;
+      border-color: var(--cyan);
+      box-shadow: 0 0 0 3px rgba(46, 230, 255, 0.15);
+    }
+
+    .row {
+      display: flex;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+    }
+
+    button {
+      flex: 1;
+      min-width: 8rem;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.95rem;
+      letter-spacing: 0.06em;
+      padding: 0.85rem 1.25rem;
+      border-radius: 0.6rem;
       border: none;
       cursor: pointer;
-      background: #2e7d32;
-      color: white;
+      color: #051018;
+      background: linear-gradient(135deg, var(--cyan), var(--violet));
+      box-shadow: 0 0 20px -4px rgba(46, 230, 255, 0.5);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
     }
-    button.active { background: #c62828; }
-    #guidance {
+    button:hover { transform: translateY(-1px); box-shadow: 0 0 28px -2px rgba(46, 230, 255, 0.7); }
+    button:active { transform: translateY(0); }
+    button:disabled {
+      background: rgba(255,255,255,0.08);
+      color: var(--text-dim);
+      box-shadow: none;
+      cursor: not-allowed;
+    }
+    button.active {
+      background: linear-gradient(135deg, var(--danger), #ff8a5c);
+      box-shadow: 0 0 20px -4px rgba(255, 61, 90, 0.6);
+    }
+    button.ghost {
+      background: transparent;
+      border: 1px solid rgba(46, 230, 255, 0.4);
+      color: var(--cyan);
+      box-shadow: none;
+    }
+
+    .status-line {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.9rem;
+      color: var(--text-dim);
+      letter-spacing: 0.04em;
+    }
+    .status-pulse {
+      width: 0.6rem;
+      height: 0.6rem;
+      border-radius: 50%;
+      background: var(--text-dim);
+      flex-shrink: 0;
+    }
+    .status-pulse.connected {
+      background: var(--ok);
+      box-shadow: 0 0 10px var(--ok);
+      animation: pulse 1.4s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    .readout {
+      min-height: 2.5rem;
+      font-size: 1.15rem;
+      font-weight: 600;
+      line-height: 1.4;
+    }
+    .readout:empty::before {
+      content: 'Standing by...';
+      color: var(--text-dim);
+      font-weight: 400;
+    }
+
+    details {
+      width: 100%;
       max-width: 30rem;
-      min-height: 3rem;
-      font-size: 1.25rem;
+      color: var(--text-dim);
+      font-size: 0.85rem;
     }
+    summary {
+      cursor: pointer;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      color: var(--text-dim);
+    }
+    details .panel { margin-top: 0.75rem; }
   </style>
 </head>
 <body>
-  <h1>guideGlass</h1>
-  <input id="wsUrl" value="ws://localhost:8123/ws" />
-  <button id="toggle">Start</button>
-  <div id="status">disconnected</div>
-  <div id="guidance"></div>
+  <header>
+    <svg class="logo-mark" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="32" cy="32" r="30" stroke="url(#g)" stroke-width="3" opacity="0.5" />
+      <circle cx="32" cy="32" r="12" stroke="url(#g)" stroke-width="3" />
+      <circle cx="32" cy="32" r="4" fill="url(#g)" />
+      <defs>
+        <linearGradient id="g" x1="0" y1="0" x2="64" y2="64">
+          <stop offset="0" stop-color="#2ee6ff" />
+          <stop offset="1" stop-color="#8a5cff" />
+        </linearGradient>
+      </defs>
+    </svg>
+    <h1>guideGlass</h1>
+    <p class="tagline">AI vision &middot; live hazard guidance &middot; spoken navigation</p>
+  </header>
 
+  <main>
+    <section class="panel">
+      <div class="panel-title"><span class="dot"></span>Hazard Guidance</div>
+      <button id="toggle">Start</button>
+      <div class="status-line"><span id="statusPulse" class="status-pulse"></span><span id="status">disconnected</span></div>
+      <div id="guidance" class="readout"></div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-title"><span class="dot"></span>Navigation</div>
+      <input id="destination" placeholder="Where are you going?" />
+      <div class="row">
+        <button id="navigate">Navigate</button>
+        <button id="speakDestination" class="ghost">🎤 Speak Destination</button>
+      </div>
+      <div id="navStatus" class="readout"></div>
+    </section>
+
+    <details>
+      <summary>Connection settings</summary>
+      <div class="panel">
+        <input id="wsUrl" placeholder="Backend WebSocket URL" value="ws://localhost:8123/ws" />
+        <input id="mapsKey" placeholder="Google Maps API key" />
+        <input id="elevenKey" placeholder="ElevenLabs API key (optional)" />
+      </div>
+    </details>
+  </main>
+
+  <script src="config.js" onerror="window.GUIDEGLASS_CONFIG = window.GUIDEGLASS_CONFIG || {}"></script>
   <script>
+    const config = window.GUIDEGLASS_CONFIG || {};
+
     const toggleBtn = document.getElementById('toggle');
     const statusEl = document.getElementById('status');
+    const statusPulseEl = document.getElementById('statusPulse');
     const guidanceEl = document.getElementById('guidance');
     const wsUrlInput = document.getElementById('wsUrl');
+    const elevenKeyInput = document.getElementById('elevenKey');
+
+    if (config.wsUrl) wsUrlInput.value = config.wsUrl;
+    elevenKeyInput.value = localStorage.getItem('elevenKey') || config.elevenKey || '';
+    elevenKeyInput.onchange = () => localStorage.setItem('elevenKey', elevenKeyInput.value.trim());
 
     let ws = null;
     let active = false;
 
+    // ElevenLabs "Rachel" voice, a default public voice available on every account
+    const ELEVEN_VOICE_ID = '21m00Tcm4TlvDq8ikWAM';
+
+    const speechQueue = [];
+    let speaking = false;
+
     function speak(text) {
-      window.speechSynthesis.cancel();
-      window.speechSynthesis.speak(new SpeechSynthesisUtterance(text));
+      speechQueue.push(text);
+      if (!speaking) drainSpeechQueue();
+    }
+
+    async function drainSpeechQueue() {
+      speaking = true;
+      while (speechQueue.length > 0) {
+        const text = speechQueue.shift();
+        await speakOnce(text);
+      }
+      speaking = false;
+    }
+
+    function speakBrowserTts(text) {
+      return new Promise((resolve) => {
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.onend = resolve;
+        utterance.onerror = resolve;
+        window.speechSynthesis.speak(utterance);
+      });
+    }
+
+    async function speakOnce(text) {
+      const apiKey = elevenKeyInput.value.trim();
+      if (!apiKey) return speakBrowserTts(text);
+
+      try {
+        const response = await fetch(
+          `https://api.elevenlabs.io/v1/text-to-speech/${ELEVEN_VOICE_ID}`,
+          {
+            method: 'POST',
+            headers: {
+              'xi-api-key': apiKey,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              text,
+              model_id: 'eleven_monolingual_v1',
+            }),
+          }
+        );
+        if (!response.ok) throw new Error(`ElevenLabs error ${response.status}`);
+
+        const audioBlob = await response.blob();
+        const audioUrl = URL.createObjectURL(audioBlob);
+        const audio = new Audio(audioUrl);
+        await new Promise((resolve) => {
+          audio.onended = resolve;
+          audio.onerror = resolve;
+          audio.play();
+        });
+        URL.revokeObjectURL(audioUrl);
+      } catch (err) {
+        console.error('ElevenLabs TTS failed, falling back to browser TTS', err);
+        await speakBrowserTts(text);
+      }
     }
 
     function connect() {
@@ -73,6 +377,7 @@
 
       ws.onopen = () => {
         statusEl.textContent = 'connected';
+        statusPulseEl.classList.add('connected');
         ws.send(JSON.stringify({ action: 'start' }));
       };
 
@@ -86,6 +391,7 @@
 
       ws.onclose = () => {
         statusEl.textContent = 'disconnected';
+        statusPulseEl.classList.remove('connected');
         active = false;
         toggleBtn.textContent = 'Start';
         toggleBtn.classList.remove('active');
@@ -93,6 +399,7 @@
 
       ws.onerror = () => {
         statusEl.textContent = 'connection error';
+        statusPulseEl.classList.remove('connected');
       };
     }
 
@@ -108,6 +415,147 @@
         ws.close();
       }
     };
+
+    // --- Turn-by-turn navigation ---
+
+    const mapsKeyInput = document.getElementById('mapsKey');
+    const destinationInput = document.getElementById('destination');
+    const navigateBtn = document.getElementById('navigate');
+    const navStatusEl = document.getElementById('navStatus');
+
+    mapsKeyInput.value = localStorage.getItem('mapsKey') || config.mapsKey || '';
+
+    const ARRIVAL_RADIUS_METERS = 15;
+    let navSteps = [];
+    let navStepIndex = 0;
+    let watchId = null;
+
+    function loadMapsScript(apiKey) {
+      if (window.google && window.google.maps) return Promise.resolve();
+      return new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(apiKey)}`;
+        script.onload = resolve;
+        script.onerror = reject;
+        document.head.appendChild(script);
+      });
+    }
+
+    function haversineMeters(a, b) {
+      const R = 6371000;
+      const toRad = (d) => (d * Math.PI) / 180;
+      const dLat = toRad(b.lat - a.lat);
+      const dLng = toRad(b.lng - a.lng);
+      const lat1 = toRad(a.lat);
+      const lat2 = toRad(b.lat);
+      const h =
+        Math.sin(dLat / 2) ** 2 +
+        Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLng / 2) ** 2;
+      return 2 * R * Math.asin(Math.sqrt(h));
+    }
+
+    function stripHtml(html) {
+      const div = document.createElement('div');
+      div.innerHTML = html;
+      return div.textContent || '';
+    }
+
+    function onPositionUpdate(position) {
+      if (navStepIndex >= navSteps.length) return;
+
+      const here = { lat: position.coords.latitude, lng: position.coords.longitude };
+      const step = navSteps[navStepIndex];
+      const distance = haversineMeters(here, step.end);
+
+      if (distance <= ARRIVAL_RADIUS_METERS) {
+        navStepIndex++;
+        if (navStepIndex >= navSteps.length) {
+          navStatusEl.textContent = "You've arrived.";
+          speak("You've arrived.");
+          navigator.geolocation.clearWatch(watchId);
+        } else {
+          const next = navSteps[navStepIndex];
+          navStatusEl.textContent = next.instruction;
+          speak(next.instruction);
+        }
+      }
+    }
+
+    function startNavigation() {
+      const apiKey = mapsKeyInput.value.trim();
+      const destination = destinationInput.value.trim();
+      if (!apiKey || !destination) return;
+      localStorage.setItem('mapsKey', apiKey);
+
+      navStatusEl.textContent = 'Getting your location...';
+
+      navigator.geolocation.getCurrentPosition(async (position) => {
+        const origin = { lat: position.coords.latitude, lng: position.coords.longitude };
+
+        navStatusEl.textContent = 'Finding route...';
+        await loadMapsScript(apiKey);
+
+        const directionsService = new google.maps.DirectionsService();
+        directionsService.route(
+          { origin, destination, travelMode: google.maps.TravelMode.WALKING },
+          (result, status) => {
+            if (status !== 'OK') {
+              navStatusEl.textContent = `Could not find a route (${status})`;
+              return;
+            }
+
+            navSteps = result.routes[0].legs[0].steps.map((step) => ({
+              instruction: stripHtml(step.instructions),
+              end: { lat: step.end_location.lat(), lng: step.end_location.lng() },
+            }));
+            navStepIndex = 0;
+
+            navStatusEl.textContent = navSteps[0].instruction;
+            speak(navSteps[0].instruction);
+
+            if (watchId !== null) navigator.geolocation.clearWatch(watchId);
+            watchId = navigator.geolocation.watchPosition(onPositionUpdate, null, {
+              enableHighAccuracy: true,
+            });
+          }
+        );
+      }, () => {
+        navStatusEl.textContent = 'Could not get your location.';
+      });
+    }
+
+    navigateBtn.onclick = startNavigation;
+
+    // --- Voice input for destination ---
+
+    const speakDestinationBtn = document.getElementById('speakDestination');
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    if (!SpeechRecognition) {
+      speakDestinationBtn.disabled = true;
+      speakDestinationBtn.title = 'Speech recognition is not supported in this browser';
+    } else {
+      speakDestinationBtn.onclick = () => {
+        const recognition = new SpeechRecognition();
+        recognition.lang = 'en-US';
+        recognition.interimResults = false;
+
+        navStatusEl.textContent = 'Listening...';
+        recognition.start();
+
+        recognition.onresult = (event) => {
+          const heard = event.results[0][0].transcript;
+          destinationInput.value = heard;
+          navStatusEl.textContent = `Heard: "${heard}"`;
+          speak(`Navigating to ${heard}`);
+          startNavigation();
+        };
+
+        recognition.onerror = () => {
+          navStatusEl.textContent = 'Could not hear a destination, try again.';
+        };
+      };
+    }
   </script>
 </body>
 </html>
